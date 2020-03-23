@@ -54,7 +54,7 @@ JNIEXPORT jstring JNICALL Java_com_huangzb_demo_PHash_PHashMatchMore
 	jmethodID arraylist_size = env->GetMethodID(cls_arraylist, "size", "()I");
 	//获取长度
 	jint len = env->CallIntMethod(jobjList, arraylist_size);
-	Pic PicArray[100000];
+	Pic PicArray[100];
 	for (int i = 0; i < len; i++) {
 		jobject obj_user = env->CallObjectMethod(jobjList, arraylist_get, i);
 
