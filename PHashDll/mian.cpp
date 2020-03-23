@@ -8,13 +8,21 @@
 #include <opencv2\highgui\highgui.hpp>
 #include "opencv2/imgcodecs/legacy/constants_c.h"
 #include "func.cpp"
-
+#include <opencv2\imgproc\types_c.h>
+#include<list>
 using namespace std;
 using namespace cv;
 
+class Pic
+{
+public:
+	String id;   
+	Mat picMat;  
+};
+
 int fingerprint(Mat src, Mat* hash);
 String init(Mat src);
-
+Mat MyJobject2Mat(JNIEnv* env, jobject jobj1);
 JNIEXPORT jstring JNICALL Java_com_huangzb_demo_PHash_PHashMatch
 (JNIEnv* env, jobject obj, jstring srcStr) {
 	char const* str;
@@ -38,7 +46,29 @@ JNIEXPORT jstring JNICALL Java_com_huangzb_demo_PHash_PHashMatch
 }
 
 JNIEXPORT jstring JNICALL Java_com_huangzb_demo_PHash_PHashMatchMore
-(JNIEnv* env, jobject obj, jobject jobj1, jobject jobj2) {
+(JNIEnv* env, jobject obj, jobject jobj1, jobject jobjList) {
+	//获取list 
+	jclass cls_arraylist = env->GetObjectClass(jobjList);
+	//获取属性
+	jmethodID arraylist_get = env->GetMethodID(cls_arraylist, "get", "(I)Ljava/lang/Object;");
+	jmethodID arraylist_size = env->GetMethodID(cls_arraylist, "size", "()I");
+	//获取长度
+	jint len = env->CallIntMethod(jobjList, arraylist_size);
+	Pic PicArray[100000];
+	for (int i = 0; i < len; i++) {
+		jobject obj_user = env->CallObjectMethod(jobjList, arraylist_get, i);
+
+
+	}
+
+	String outputpath = init(MyJobject2Mat(env,jobj1));
+	// 返回一个字符串
+	char const* tmpstr = outputpath.c_str();
+	jstring rtstr = env->NewStringUTF(tmpstr);
+	return rtstr;
+}
+
+Mat MyJobject2Mat(JNIEnv* env, jobject jobj1) {
 	//获得pic类引用
 	jclass pic_cla = env->GetObjectClass(jobj1);
 	if (pic_cla == NULL)
@@ -70,16 +100,10 @@ JNIEXPORT jstring JNICALL Java_com_huangzb_demo_PHash_PHashMatchMore
 
 	//将传送来的字符串转换成mat图像方便进行图像处理
 	Mat mymat = Base2Mat(str_picdata);
-
-	//将mat图像保存在本地
-	imwrite("F:\\PHashPic1.jpg", mymat);
-
-	String outputpath = init(mymat);
-
-	// 返回一个字符串
-	char const* tmpstr = outputpath.c_str();
-	jstring rtstr = env->NewStringUTF(tmpstr);
-	return rtstr;
+	Mat testpic;
+	//将使用base64转换的图像转换成灰度图处理
+	cvtColor(mymat, testpic, CV_RGB2GRAY);
+	return testpic;
 }
 int fingerprint(Mat src, Mat* hash)
 {
@@ -108,7 +132,6 @@ int fingerprint(Mat src, Mat* hash)
 	*hash = phashcode.reshape(0, 1).clone();
 	return 0;
 }
-
 String  init(Mat src) {
 
 	if (src.empty())

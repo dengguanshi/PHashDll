@@ -11,6 +11,8 @@
 using namespace std;
 using namespace cv;
 
+
+//将base64编码的图像转换成Mat
 static std::string base64Decode(const char* Data, int DataByte) {
 	//解码表
 	const char DecodeTable[] =
@@ -111,5 +113,6 @@ static cv::Mat Base2Mat(std::string& base64_data) {
 	img = cv::imdecode(base64_img, CV_LOAD_IMAGE_COLOR);
 	return img;
 }
+
 
 
